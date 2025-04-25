@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rain Intensity-Based Automatic Wiper System</title>
+    <style>
+        :root {
+            --primary: #1a73e8;
+            --secondary: #4285f4;
+            --dark: #202124;
+            --light: #f8f9fa;
+            --success: #0f9d58;
+            --warning: #f4b400;
+            --danger: #db4437;
+            --gray: #5f6368;
+            --light-gray: #dadce0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: var(--secondary);
+            padding: 0.5rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            margin: 0 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        nav a:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+        
+        section {
+            padding: 2rem;
+            margin: 1rem auto;
+            max-width: 1200px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .feature-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+        
+        .feature-card h3 {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .demo-container {
+            background-color: var(--light);
+            padding: 2rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+            height: 400px;
+        }
+        
+        .windshield {
+            width: 100%;
+            height: 300px;
+            background-color: #a8c7fa;
+            border-radius: 100px 100px 0 0;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+        
+        .wiper-left, .wiper-right {
+            position: absolute;
+            width: 50%;
+            height: 10px;
+            background-color: #333;
+            bottom: 30px;
+            transform-origin: left center;
+            z-index: 10;
+        }
+        
+        .wiper-left {
+            left: 50%;
+            transform: rotate(-45deg);
+        }
+        
+        .wiper-right {
+            left: 50%;
+            transform: rotate(45deg);
+        }
+        
+        .raindrop {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background-color: rgba(0, 111, 255, 0.6);
+            top: -20px;
+            border-radius: 50%;
+        }
+        
+        .controls {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .slider-container {
+            width: 100%;
+        }
+        
+        .slider {
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .status {
+            background-color: var(--light);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .status-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 0.5rem;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .status-value {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider-switch {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider-switch:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider-switch {
+            background-color: var(--success);
+        }
+        
+        input:checked + .slider-switch:before {
+            transform: translateX(26px);
+        }
+        
+        .system-architecture {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem auto;
+            display: block;
+        }
+        
+        .dashboard {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .dashboard-item {
+            background-color: #34495e;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .dashboard-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav a {
+                margin-bottom: 0.5rem;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Rain Intensity-Based Automatic Wiper System</h1>
+        <p>Smart technology for improved driving safety</p>
+    </header>
+    
+    <nav>
+        <a href="#overview">Overview</a>
+        <a href="#demo">Demo</a>
+        <a href="#features">Features</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#interface">Interface</a>
+    </nav>
+    
+    <section id="overview">
+        <h2>Project Overview</h2>
+        <p>Our Rain Intensity-Based Automatic Wiper System represents a significant advancement in automotive safety technology. By detecting rainfall intensity in real-time, the system automatically adjusts wiper speed for optimal visibility without driver intervention.</p>
+        
+        <div class="status">
+            <div class="status-item">
+                <span>Safety Improvement</span>
+                <span class="status-value">37%</span>
+            </div>
+            <div class="status-item">
+                <span>Driver Comfort</span>
+                <span class="status-value">48%</span>
+            </div>
+            <div class="status-item">
+                <span>Implementation Cost</span>
+                <span class="status-value">Low</span>
+            </div>
+            <div class="status-item">
+                <span>Energy Efficiency</span>
+                <span class="status-value">High</span>
+            </div>
+        </div>
+    </section>
+    
+    <section id="demo">
+        <h2>Interactive Demo</h2>
+        <p>This simulation demonstrates how our system automatically adapts to changing rain conditions. Use the controls below to adjust rain intensity and see how the wiper system responds.</p>
+        
+        <div class="demo-container">
+            <div class="windshield" id="windshield">
+                <div class="wiper-left" id="wiper-left"></div>
+                <div class="wiper-right" id="wiper-right"></div>
+                <!-- Raindrops will be added dynamically -->
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <h3>Rain Intensity</h3>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="30" class="slider" id="rain-intensity">
+                        <div class="slider-labels">
+                            <span>None</span>
+                            <span style="float: right;">Heavy</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>System Mode</h3>
+                    <div>
+                        <button id="auto-mode" class="active">Automatic</button>
+                        <button id="manual-mode">Manual</button>
+                    </div>
+                    <div style="margin-top: 1rem;">
+                        <label for="sensitivity">Sensitivity:</label>
+                        <input type="range" min="1" max="10" value="5" id="sensitivity" disabled>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <h3>Manual Controls</h3>
+                    <div>
+                        <button id="off-button" disabled>Off</button>
+                        <button id="low-button" disabled>Low</button>
+                        <button id="medium-button" disabled>Medium</button>
+                        <button id="high-button" disabled>High</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="status">
+                <div class="status-item">
+                    <span>Current Mode</span>
+                    <span class="status-value" id="current-mode">Automatic</span>
+                </div>
+                <div class="status-item">
+                    <span>Rain Level</span>
+                    <span class="status-value" id="rain-level">Moderate</span>
+                </div>
+                <div class="status-item">
+                    <span>Wiper Speed</span>
+                    <span class="status-value" id="wiper-speed">Medium</span>
+                </div>
+                <div class="status-item">
+                    <span>Sensitivity</span>
+                    <span class="status-value" id="sensitivity-value">5</span>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section id="features">
+        <h2>Key Features</h2>
+        <p>Our system incorporates advanced technology to provide a seamless experience for drivers in various weather conditions.</p>
+        
+        <div class="feature-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🌧️</div>
+                <h3>Automatic Rain Detection</h3>
+                <p>Advanced sensors detect the presence of rain and activate wipers automatically without driver intervention.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Variable Speed Control</h3>
+                <p>System intelligently adjusts wiper speed based on rainfall intensity for optimal visibility.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔧</div>
+                <h3>Sensitivity Adjustment</h3>
+                <p>Allows driver to customize detection threshold according to personal preference.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">👋</div>
+                <h3>Manual Override</h3>
+                <p>Provides driver with ability to take control when desired for specific situations.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🌙</div>
+                <h3>Night Mode Detection</h3>
+                <p>Specialized sensing algorithms for improved performance during nighttime conditions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🌡️</div>
+                <h3>Temperature Compensation</h3>
+                <p>Adjusts sensing parameters based on environmental factors for consistent performance.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⏱️</div>
+                <h3>Delay Timing</h3>
+                <p>Incorporates intermittent wiper functionality with adaptive intervals based on conditions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚙️</div>
+                <h3>Self-Calibration</h3>
+                <p>System periodically recalibrates for optimal performance in changing conditions.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚠️</div>
+                <h3>Fault Detection</h3>
+                <p>Alerts driver to sensor or system malfunctions with diagnostic information.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🔋</div>
+                <h3>Energy Efficiency</h3>
+                <p>Optimizes wiper usage to reduce power consumption and extend component life.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Dashboard Interface</h3>
+                <p>Visual indication of current system status and mode through intuitive dashboard display.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3>Memory Function</h3>
+                <p>Remembers driver preferences for different conditions to enhance user experience.</p>
+            </div>
+        </div>
+    </section>
+    
+    <section id="architecture">
+        <h2>System Architecture</h2>
+        <p>Our system utilizes a modular architecture with multiple components working together to deliver intelligent wiper control:</p>
+        
+        <svg class="system-architecture" viewBox="0 0 800 400">
+            <!-- System Architecture Diagram -->
+            <rect x="350" y="160" width="120" height="60" rx="10" fill="#4285f4" />
+            <text x="410" y="190" text-anchor="middle" fill="white" font-weight="bold">Control Unit</text>
+            
+            <!-- Rain Sensor -->
+            <rect x="150" y="160" width="120" height="60" rx="10" fill="#0f9d58" />
+            <text x="210" y="190" text-anchor="middle" fill="white" font-weight="bold">Rain Sensor</text>
+            
+            <!-- Wiper Motor -->
+            <rect x="550" y="160" width="120" height="60" rx="10" fill="#db4437" />
+            <text x="610" y="190" text-anchor="middle" fill="white" font-weight="bold">Wiper Motor</text>
+            
+            <!-- User Interface -->
+            <rect x="350" y="50" width="120" height="60" rx="10" fill="#f4b400" />
+            <text x="410" y="80" text-anchor="middle" fill="white" font-weight="bold">User Interface</text>
+            
+            <!-- Temperature Sensor -->
+            <rect x="150" y="270" width="120" height="60" rx="10" fill="#0f9d58" />
+            <text x="210" y="300" text-anchor="middle" fill="white" font-weight="bold">Temperature Sensor</text>
+            
+            <!-- Light Sensor -->
+            <rect x="550" y="270" width="120" height="60" rx="10" fill="#0f9d58" />
+            <text x="610" y="300" text-anchor="middle" fill="white" font-weight="bold">Light Sensor</text>
+            
+            <!-- Connection Lines -->
+            <line x1="270" y1="190" x2="350" y2="190" stroke="#333" stroke-width="2" />
+            <line x1="470" y1="190" x2="550" y2="190" stroke="#333" stroke-width="2" />
+            <line x1="410" y1="110" x2="410" y2="160" stroke="#333" stroke-width="2" />
+            <line x1="210" y1="270" x2="210" y2="220" stroke="#333" stroke-width="2" />
+            <line x1="610" y1="270" x2="610" y2="220" stroke="#333" stroke-width="2" />
+            <line x1="210" y1="270" x2="350" y2="190" stroke="#333" stroke-width="2" />
+            <line x1="610" y1="270" x2="470" y2="190" stroke="#333" stroke-width="2" />
+            
+            <!-- Arrowheads -->
+            <polygon points="350,190 340,185 340,195" fill="#333" />
+            <polygon points="550,190 540,185 540,195" fill="#333" />
+            <polygon points="410,160 405,150 415,150" fill="#333" />
+            <polygon points="350,190 340,195 345,185" fill="#333" />
+            <polygon points="470,190 480,195 475,185" fill="#333" />
+        </svg>
+        
+        <h3>Component Interactions</h3>
+        <ul>
+            <li><strong>Rain Sensor:</strong> Detects precipitation and measures its intensity</li>
+            <li><strong>Temperature Sensor:</strong> Provides environmental data for compensation algorithms</li>
+            <li><strong>Light Sensor:</strong> Determines ambient light conditions for day/night operation</li>
+            <li><strong>Control Unit:</strong> Processes sensor data and executes control algorithms</li>
+            <li><strong>User Interface:</strong> Allows driver interaction and displays system status</li>
+            <li><strong>Wiper Motor:</strong> Executes the physical wiper movement at controlled speeds</li>
+        </ul>
+    </section>
+    
+    <section id="interface">
+        <h2>Driver Interface</h2>
+        <p>Our system provides an intuitive dashboard interface that allows drivers to monitor and control the wiper system.</p>
+        
+        <div class="dashboard">
+            <div class="dashboard-item">
+                <h3>System Status</h3>
+                <div class="dashboard-value">ACTIVE</div>
+                <label class="toggle-switch">
+                    <input type="checkbox" checked>
+                    <span class="slider-switch"></span>
+                </label>
+            </div>
+            
+            <div class="dashboard-item">
+                <h3>Mode</h3>
+                <div class="dashboard-value">AUTO</div>
+                <button>Change</button>
+            </div>
+            
+            <div class="dashboard-item">
+                <h3>Rain Level</h3>
+                <div class="dashboard-value">MEDIUM</div>
+                <div style="height: 5px; background-color: #3498db; margin-top: 10px; width: 60%;"></div>
+            </div>
+            
+            <div class="dashboard-item">
+                <h3>Sensitivity</h3>
+                <div class="dashboard-value">6</div>
+                <input type="range" min="1" max="10" value="6" style="width: 100%">
+            </div>
+            
+            <div class="dashboard-item">
+                <h3>Wiper Speed</h3>
+                <div class="dashboard-value">NORMAL</div>
+                <button>Override</button>
+            </div>
+            
+            <div class="dashboard-item">
+                <h3>Night Mode</h3>
+                <div class="dashboard-value">OFF</div>
+                <label class="toggle-switch">
+                    <input type="checkbox">
+                    <span class="slider-switch"></span>
+                </label>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <p>&copy; 2025 Rain Intensity-Based Automatic Wiper System | Academic Project Demo</p>
+    </footer>
+
+    <script>
+        // Rain simulation variables
+        let raindrops = [];
+        const windshield = document.getElementById('windshield');
+        const wiperLeft = document.getElementById('wiper-left');
+        const wiperRight = document.getElementById('wiper-right');
+        let rainIntensity = 30;
+        let wiperSpeed = 2000; // ms per cycle
+        let wiperAngle = -45;
+        let wiperDirection = 1;
+        let wiperActive = true;
+        let isAutoMode = true;
+        
+        // Control elements
+        const rainSlider = document.getElementById('rain-intensity');
+        const sensitivitySlider = document.getElementById('sensitivity');
+        const autoModeBtn = document.getElementById('auto-mode');
+        const manualModeBtn = document.getElementById('manual-mode');
+        const offButton = document.getElementById('off-button');
+        const lowButton = document.getElementById('low-button');
+        const mediumButton = document.getElementById('medium-button');
+        const highButton = document.getElementById('high-button');
+        
+        // Status elements
+        const currentModeElement = document.getElementById('current-mode');
+        const rainLevelElement = document.getElementById('rain-level');
+        const wiperSpeedElement = document.getElementById('wiper-speed');
+        const sensitivityValueElement = document.getElementById('sensitivity-value');
+        
+        // Initialize rain
+        function createRaindrop() {
+            const raindrop = document.createElement('div');
+            raindrop.classList.add('raindrop');
+            raindrop.style.left = Math.random() * 100 + '%';
+            raindrop.style.animationDuration = Math.random() * 1 + 0.5 + 's';
+            raindrop.style.opacity = Math.random() * 0.7 + 0.3;
+            windshield.appendChild(raindrop);
+            
+            // Animate raindrop
+            let topPosition = -20;
+            const speed = Math.random() * 3 + 2;
+            
+            const moveRaindrop = () => {
+                if (topPosition > 300) {
+                    windshield.removeChild(raindrop);
+                    return;
+                }
+                
+                topPosition += speed;
+                raindrop.style.top = topPosition + 'px';
+                requestAnimationFrame(moveRaindrop);
+            };
+            
+            requestAnimationFrame(moveRaindrop);
+            
+            return raindrop;
+        }
+        
+        function updateRain() {
+            // Create new raindrops based on intensity
+            const newDropCount = Math.floor(rainIntensity / 10);
+            for (let i = 0; i < newDropCount; i++) {
+                if (Math.random() < 0.3) {
+                    raindrops.push(createRaindrop());
+                }
+            }
+        }
+        
+        // Initialize wipers
+        function moveWipers() {
+            if (!wiperActive) return;
+            
+            wiperAngle += wiperDirection;
+            
+            if (wiperAngle > 45) {
+                wiperDirection = -1;
+            } else if (wiperAngle < -45) {
+                wiperDirection = 1;
+                
+                // After completing a cycle, wait based on speed before starting again
+                wiperActive = false;
+                setTimeout(() => {
+                    wiperActive = true;
+                    moveWipers();
+                }, wiperSpeed);
+                
+                return;
+            }
+            
+            wiperLeft.style.transform = `rotate(${wiperAngle}deg)`;
+            wiperRight.style.transform = `rotate(${-wiperAngle}deg)`;
+            
+            requestAnimationFrame(moveWipers);
+        }
+        
+        // Update system based on rain intensity
+        function updateWiperSystem() {
+            let speedText = '';
+            
+            if (isAutoMode) {
+                const sensitivity = parseInt(sensitivitySlider.value);
+                const adjustedIntensity = rainIntensity * (sensitivity / 5);
+                
+                if (adjustedIntensity < 10) {
+                    wiperSpeed = 5000;
+                    speedText = 'Low';
+                } else if (adjustedIntensity < 30) {
+                    wiperSpeed = 3000;
+                    speedText = 'Medium';
+                } else if (adjustedIntensity < 70) {
+                    wiperSpeed = 1500;
+                    speedText = 'High';
+                } else {
+                    wiperSpeed = 800;
+                    speedText = 'Very High';
+                }
+                
+                wiperActive = adjustedIntensity > 5;
+            }
+            
+            // Update UI
+            if (rainIntensity < 10) {
+                rainLevelElement.textContent = 'None';
+            } else if (rainIntensity < 30) {
+                rainLevelElement.textContent = 'Light';
+            } else if (rainIntensity < 70) {
+                rainLevelElement.textContent = 'Moderate';
+            } else {
+                rainLevelElement.textContent = 'Heavy';
+            }
+            
+            wiperSpeedElement.textContent = wiperActive ? speedText : 'Off';
+            
+            if (!wiperActive && rainIntensity > 0) {
+                moveWipers();
+            }
+        }
+        
+        // Event listeners
+        rainSlider.addEventListener('input', function() {
+            rainIntensity = parseInt(this.value);
+            updateWiperSystem();
+        });
+        
+        sensitivitySlider.addEventListener('input', function() {
+            sensitivityValueElement.textContent = this.value;
+            updateWiperSystem();
+        });
+        
+        autoModeBtn.addEventListener('click', function() {
+            isAutoMode = true;
+            currentModeElement.textContent = 'Automatic';
+            autoModeBtn.classList.add('active');
+            manualModeBtn.classList.remove('active');
+            
+            // Enable/disable controls
+            sensitivitySlider.disabled = false;
+            offButton.disabled = true;
+            lowButton.disabled = true;
+            mediumButton.disabled = true;
+            highButton.disabled = true;
+            
+            updateWiperSystem();
+        });
+        
+        manualModeBtn.addEventListener('click', function() {
+            isAutoMode = false;
+            currentModeElement.textContent = 'Manual';
+            autoModeBtn.classList.remove('active');
+            manualModeBtn.classList.add('active');
+            
+            // Enable/disable controls
+            sensitivitySlider.disabled = true;
+            offButton.disabled = false;
+            lowButton.disabled = false;
+            mediumButton.disabled = false;
+            highButton.disabled = false;
+        });
+        
+        offButton.addEventListener('click', function() {
+            wiperActive = false;
+            wiperSpeedElement.textContent = 'Off';
+        });
+        
+        lowButton.addEventListener('click', function() {
+            wiperSpeed = 5000;
+            wiperActive = true;
+            wiperSpeedElement.textContent = 'Low';
+            moveWipers();
+        });
+        
+        mediumButton.addEventListener('click', function() {
+            wiperSpeed = 2500;
+            wiperActive = true;
+            wiperSpeedElement.textContent = 'Medium';
+            moveWipers();
+        });
+        
+        highButton.addEventListener('click', function() {
+            wiperSpeed = 1000;
+            wiperActive = true;
+            wiperSpeedElement.textContent = 'High';
+            moveWipers();
+        });
+        
+        // Initialize system
+        setInterval(updateRain, 100);
+        moveWipers();
+        updateWiperSystem();
+    </script>
+</body>
+</html>

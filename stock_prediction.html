@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Price Analysis & Prediction - Sujay Rasal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6de5;
+            --secondary-color: #2a4dd0;
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --card-bg: #f5f7ff;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --code-bg: #f1f1f1;
+        }
+
+        .dark-mode {
+            --primary-color: #6d8eff;
+            --secondary-color: #4a6de5;
+            --bg-color: #121212;
+            --text-color: #f0f0f0;
+            --card-bg: #1e1e1e;
+            --border-color: #2d2d2d;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --code-bg: #2a2a2a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        /* Header & Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1rem 2rem;
+            background-color: var(--bg-color);
+            box-shadow: 0 1px 10px var(--shadow-color);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        .theme-toggle {
+            margin-left: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .hamburger {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--text-color);
+        }
+
+        /* Main Content */
+        main {
+            padding-top: 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-bottom: 4rem;
+        }
+
+        .project-header {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .project-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .project-title::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 4px;
+            background-color: var(--primary-color);
+            bottom: -10px;
+            left: 25%;
+        }
+
+        .project-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            max-width: 800px;
+            margin: 1.5rem auto;
+        }
+
+        .project-content {
+            padding: 0 2rem;
+        }
+
+        .section {
+            margin-bottom: 3rem;
+        }
+
+        .section-heading {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .section p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .image-container {
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .project-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+
+        .tech-item {
+            background-color: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .key-features {
+            margin: 1.5rem 0;
+        }
+
+        .key-features li {
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background-color: var(--code-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .code-block code {
+            white-space: pre;
+        }
+
+        .back-to-portfolio {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-top: 2rem;
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+
+        .back-to-portfolio:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .social-icons {
+            margin-bottom: 1rem;
+        }
+
+        .social-icon {
+            color: var(--text-color);
+            font-size: 1.5rem;
+            margin: 0 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            color: var(--primary-color);
+        }
+
+        .copyright {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+
+        /* Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header {
+                padding: 1rem;
+            }
+
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background-color: var(--bg-color);
+                flex-direction: column;
+                padding: 1rem 0;
+                box-shadow: 0 5px 10px var(--shadow-color);
+            }
+
+            nav ul.active {
+                display: flex;
+            }
+
+            nav ul li {
+                margin: 1rem 0;
+                text-align: center;
+            }
+
+            .hamburger {
+                display: block;
+            }
+
+            .project-title {
+                font-size: 2rem;
+            }
+
+            .project-content {
+                padding: 0 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .project-title {
+                font-size: 1.8rem;
+            }
+
+            main {
+                padding-top: 70px;
+            }
+
+            .project-header {
+                padding: 2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <a href="index.html" class="logo">Portfolio</a>
+        <nav>
+            <div class="hamburger" id="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+            <ul id="nav-menu">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+            <button class="theme-toggle" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="project-header fade-in">
+            <h1 class="project-title">Stock Price Analysis & Prediction</h1>
+            <p class="project-subtitle">A data science project that analyzes historical Apple stock prices using Python, implements moving averages, visualizes trends, and forecasts future prices with the Prophet model.</p>
+        </div>
+
+        <div class="project-content">
+            <section class="section fade-in">
+                <h2 class="section-heading">Project Overview</h2>
+                <p>This project explores Apple's stock price data from 2015 to 2024, applying various data analysis and machine learning techniques to understand historical trends and predict future price movements. By implementing moving averages, visualizing data patterns, and employing the Prophet forecasting model, this project demonstrates practical applications of data science in financial analysis.</p>
+                
+                <div class="tech-stack">
+                    <span class="tech-item">Python</span>
+                    <span class="tech-item">Pandas</span>
+                    <span class="tech-item">Matplotlib</span>
+                    <span class="tech-item">Prophet</span>
+                    <span class="tech-item">yfinance</span>
+                    <span class="tech-item">scikit-learn</span>
+                </div>
+                
+                <div class="image-container">
+                    <img src="/api/placeholder/800/400" alt="Stock Price Chart" class="project-image">
+                </div>
+            </section>
+
+            <section class="section fade-in">
+                <h2 class="section-heading">Key Features</h2>
+                <ul class="key-features">
+                    <li><strong>Data Acquisition:</strong> Automated stock data retrieval using the yfinance API for Apple Inc. (AAPL) covering a 9-year period.</li>
+                    <li><strong>Technical Analysis:</strong> Implementation of 10-day and 50-day moving averages to identify trends and potential trading signals.</li>
+                    <li><strong>Data Visualization:</strong> Creation of informative charts showing price movements and technical indicators.</li>
+                    <li><strong>Time Series Forecasting:</strong> Application of Facebook's Prophet model to predict future stock prices.</li>
+                    <li><strong>Performance Evaluation:</strong> Calculation of Root Mean Square Error (RMSE) to assess prediction accuracy.</li>
+                </ul>
+            </section>
+
+            <section class="section fade-in">
+                <h2 class="section-heading">Implementation Details</h2>
+                
+                <h3>Data Collection</h3>
+                <p>The project begins by retrieving Apple stock data using the yfinance library, which provides a convenient way to download historical market data from Yahoo Finance:</p>
+                
+                <div class="code-block">
+                    <code>
+import yfinance as yf
+import pandas as pd
+import os
+
+# Create 'data' directory if it doesn't exist
+os.makedirs('data', exist_ok=True)
+
+# Download data for Apple (AAPL)
+data = yf.download('AAPL', start='2015-01-01', end='2024-01-01')
+
+# Save to CSV inside the 'data' folder
+data.to_csv('data/AAPL.csv')
+                    </code>
+                </div>
+
+                <h3>Technical Analysis with Moving Averages</h3>
+                <p>Moving averages help smooth out price data to identify the direction of the trend. The project calculates 10-day and 50-day moving averages:</p>
+                
+                <div class="code-block">
+                    <code>
+data['MA10'] = data['Close'].rolling(10).mean()
+data['MA50'] = data['Close'].rolling(50).mean()
+data = data.dropna()
+                    </code>
+                </div>
+                
+                <div class="image-container">
+                    <img src="/api/placeholder/800/400" alt="Moving Averages Chart" class="project-image">
+                </div>
+
+                <h3>Time Series Forecasting with Prophet</h3>
+                <p>Facebook's Prophet is a powerful time series forecasting tool that handles seasonality and trends effectively:</p>
+                
+                <div class="code-block">
+                    <code>
+from prophet import Prophet
+
+df = data.reset_index()[['Date', 'Close']]
+df.columns = ['ds', 'y']
+
+model = Prophet()
+model.fit(df)
+future = model.make_future_dataframe(periods=30)
+forecast = model.predict(future)
+
+model.plot(forecast)
+                    </code>
+                </div>
+                
+                <div class="image-container">
+                    <img src="/api/placeholder/800/400" alt="Prophet Forecast" class="project-image">
+                </div>
+
+                <h3>Model Evaluation</h3>
+                <p>The project evaluates model performance using Root Mean Square Error (RMSE), which measures the differences between predicted and observed values:</p>
+                
+                <div class="code-block">
+                    <code>
+import numpy as np
+from sklearn.metrics import mean_squared_error
+
+# Define actual and predicted values
+actual = df['Close']
+predicted = df['Predicted_Close']
+
+# Calculate RMSE
+rmse = np.sqrt(mean_squared_error(actual, predicted))
+print("RMSE:", rmse)
+                    </code>
+                </div>
+            </section>
+
+            <section class="section fade-in">
+                <h2 class="section-heading">Conclusions</h2>
+                <p>This project demonstrates the application of data science techniques to financial market analysis. The combination of technical indicators like moving averages and advanced forecasting models like Prophet provides valuable insights for understanding stock price movements.</p>
+                
+                <p>Key findings include:</p>
+                <ul class="key-features">
+                    <li>Moving averages effectively identify underlying trends in Apple's stock price.</li>
+                    <li>The Prophet model can capture both long-term trends and seasonal patterns in stock prices.</li>
+                    <li>Performance metrics like RMSE help quantify prediction accuracy and provide a basis for model comparison.</li>
+                </ul>
+                
+                <p>Future improvements could include incorporating additional technical indicators, implementing sentiment analysis from news sources, and exploring more advanced machine learning models for prediction.</p>
+                
+                <a href="index.html#projects" class="back-to-portfolio">Back to Portfolio</a>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="social-icons">
+            <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p class="copyright">© 2025 Sujay Rasal. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Toggle mobile navigation
+        const hamburger = document.getElementById('hamburger');
+        const navMenu = document.getElementById('nav-menu');
+
+        hamburger.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+
+        // Close mobile menu when clicking a nav link
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', () => {
+                navMenu.classList.remove('active');
+            });
+        });
+
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const icon = themeToggle.querySelector('i');
+
+        // Check for saved theme preference or use preferred color scheme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            body.classList.add('dark-mode');
+            icon.classList.replace('fa-moon', 'fa-sun');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            
+            // Update icon based on current theme
+            if (body.classList.contains('dark-mode')) {
+                icon.classList.replace('fa-moon', 'fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                icon.classList.replace('fa-sun', 'fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Scroll animations
+        const fadeElements = document.querySelectorAll('.fade-in');
+
+        const fadeInOnScroll = () => {
+            fadeElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (elementTop < windowHeight - 100) {
+                    element.classList.add('visible');
+                }
+            });
+        };
+
+        // Initial check on load
+        fadeInOnScroll();
+
+        // Check on scroll
+        window.addEventListener('scroll', fadeInOnScroll);
+    </script>
+</body>
+</html>
